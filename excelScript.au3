@@ -1,14 +1,18 @@
-
-Global $dataArray, $numberOfSelectedLines, $dataString
+#include <Array.au3>
+Global $employeeNumberArray, $numberOfSelectedLines, $employeeNumber
 
 func clearExcel()
    Send("{CtrlDown}{Home}{CtrlUp}")
    Sleep(100)
+   Send("{Right}")
+   sleep(100)
    Send("{CtrlDown}{ShiftDown}{Down}{CtrlUp}{ShiftUp}")
    $numberOfSelectedLines = InputBox("Input","Enter the number of selected lines") ; String
    Sleep(100)
-   $numberOfSelectedLines += 0
-   Send("{Right 5}")
+   $numberOfSelectedLines += 0; convert the entered string into int
+   Send("{CtrlDown}{Home}{CtrlUp}")
+
+
    Local $regex = "[^\W_]+"
 
    For $i= $numberOfSelectedLines To 1 Step -1
@@ -21,12 +25,12 @@ func clearExcel()
 
 	  Local $clipboardValue = ClipGet()
 	  Sleep(100)
-	  Local $regexResult = StringRegExp($clipboardValue,$regex)
-	  If $regexResult == 0 Then
+	  Local $regexResult = StringRegExp($clipboardValue,$regex);check if the selected case is empty
+	  If $regexResult == 0 Then; if case is empty, the current number wasn't checked. delete le current line
 		 Send("{ShiftDown}{Space}{ShiftUp}")
 		 Sleep(100)
 		 Send("{CtrlDown}{-}{CtrlUp}")
-	  Else
+	  Else; else go to the next line
 
 		 ;MsgBox(0,"clip",$regexResult)
 		 Sleep(100)
@@ -40,79 +44,48 @@ func clearExcel()
    Sleep(50)
    Send("{CtrlDown}{ShiftDown}{Down}{CtrlUp}{ShiftUp}")
    Sleep(50)
-   ;$numberOfSelectedLines = InputBox("Input","Enter the number of selected lines")   ; String
-   ;Sleep(50)
-   ;Send("{CtrlDown}c{CtrlUp}")
-   ;Sleep(50)
-    ;Run("notepad.exe")
-   ;Local $hWnd = WinWait("Untitled - Notepad", "", 10)
-   ;Sleep(50)
-  ; FileWrite($hWnd, ClipGet())
-   ;sleep(1000)
-   ;clipput("!@#:")
-  ; MsgBox(0,'',StringLen(clipget()))
 
-
-  ; for $i = 1 to $numberOfSelectedLines
-	 ; $line = FileReadLine($hWnd,$i)
-	  ;MsgBox(0,"line",$line)
-  ; Next
-
-   ;Local $transfferedFiles = ClipGet()
    $numberOfSelectedLines = InputBox("Input","Enter the number of selected lines")   ; String
-   Sleep(50)
+   Sleep(100)
    Send("{CtrlDown}{Home}{CtrlUp}")
-   $dataArray = ""
+   Send("{Right}")
+  $employeeNumberArray[ $numberOfSelectedLines]
 
-   For $i= $numberOfSelectedLines To 1 Step -1
+   For $i= 0 To $numberOfSelectedLines-1 Step 1
 	  Send("{CtrlDown}c{CtrlUp}")
-      Sleep(50)
-	  $dataString &= ClipGet()
+      Sleep(100)
+	  $employeeNumber = ClipGet()
+	   $employeeNumber = StringRegExpReplace( $employeeNumber, '\v{1,2}$', ''); '\v{1,2}$' = new line in autoit  --   => replace new line in the string by empty character
+	  sleep(100)
 
-	  if $i > 1 Then
-		 $dataString &= ","
+
+		 _ArrayPush ( $employeeNumberArray, $employeeNumber )
 		 Send("{Down}")
-	  EndIf
+		 sleep(100)
+
 	  ;MsgBox(0,"i",$i)
    Next
-   Sleep(100)
-   MsgBox(0, "",$dataString)
-   Sleep(100)
-   $dataArray = StringSplit($dataString,",")
 
-   ;Local $data = StringToASCIIArray($dataArray[1])
-
-   For $i= 1 To $numberOfSelectedLines Step 1
-	  $dataArray[$i] = StringRegExpReplace($dataArray[$i], '\v{1,2}$', '')
-	 MsgBox(0,"",StringLen($dataArray[$i]))
-  Next
-
-  For $i= 0 To 10 Step 1
-	  ;StringStripWS($dataArray[$i],8)
-	; MsgBox(0,"ascii",StringLen($data[$i]))
+   For $j= 0 To $numberOfSelectedLines-1 Step 1
+	 MsgBox(0, "",$employeeNumberArray[$j])
    Next
-
-
-
-  ; MsgBox(0,"",Ubound($dataArray) - 1)
+   Sleep(100)
 
 
 
 
+EndFunc
+
+Func exitScript()
    Exit
 EndFunc
-sleep(5000)
+
+
 MsgBox(0,"test","started")
 
 HotKeySet("^{j}", "clearExcel")
-;Send("+{Space}")
-Sleep(5000)
-;Send("^{Home}")
-;Send("^+{Down}")
-;FileOpen("ClasseurTest.xlsx")
-WinWaitActive("ClasseurTest.xlsx - Excel","waiting for excel")
-;Global $oExcel = _Excel_Open()
-;Global $oWorkbook = _Excel_BookOpen($oExcel, "ClasseurTest.xlsx")
-Sleep(5000)
-Send("^j")
-RunWait("Exit")
+HotKeySet("{ESC}","exitScript")
+while 1
+   sleep(100)
+   WEnd
+
